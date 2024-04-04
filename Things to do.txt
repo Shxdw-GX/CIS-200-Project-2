@@ -1,0 +1,21 @@
+Things to do:
+1) Get the job type number
+2) Create a processor class
+3) Go back to queue to get inof about queue (queue functions)
+4)
+
+
+
+
+
+New Quest:
+Method names:
+
+class processor (private) - needs # of processors, idle time, run time, if it's running, and a variable to access job struct (I.E. Job currentJob)
+(public) - method to return if processor has a job, if the job is high priority, method to return the current job processor was working on and prepares it for new job (removing the job from the processor), insert job into processor, get the actual processor #, get the idle time of processor, get the running time of processor, returns copy of current job processor is processing from job struct, reduce processing time (decrement current job's processing time and INCREMENT running time), increment idle time, method to set processor #, get if processor is running or not
+
+class queue (private) - needs queues for normal and priority queue as well as something to store all the processed jobs (can implement as vector?)
+(public) - method to determine if normal queue empty, if prior queue empty, insert job to normal queue, insert job to prior queue, method to insert jobs that are completed to a seperate vector, need method to insert jobs IN THE FRONT of normal queue, method to return a copy of what first job was in norm queue, method that returns first job from normal queue and deletes the same job from that queue (temp var is returned), method that returns first job from prior queue and deletes the same job from that queue (temp var is returned), method to get total queue size, method to get current norm queue size, method to get current prior queue size, method to return # of completed jobs, method to increment current wait time of all jobs in either P.Q or norm queue, method to return # of jobs that have arrived of specific type, method to return # of jobs of specific type that have been completed, method to return the total of time jobs spent in queue
+
+struct job - job type, # of jobs for specific type, overall # of jobs, arrival time, processing time, time in queue
+ 
