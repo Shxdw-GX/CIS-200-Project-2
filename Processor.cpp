@@ -1,12 +1,4 @@
-//
-//  processor.cpp
-//  200project2
-//
-//  Created by shreyas babel on 08/04/24.
-//
-
-#include "processor.hpp"
-
+#include "Processor.h"
 
 Processor::Processor(int num) {
     processorNumber = num;
@@ -14,6 +6,17 @@ Processor::Processor(int num) {
     isBusy = false;
     idleTime = 0;
     runningTime = 0;
+    currentJob = {};
+}
+
+Processor::Processor()
+{
+    processorNumber = 1;
+    runningStatus = false;
+    isBusy = false;
+    idleTime = 0;
+    runningTime = 0;
+    currentJob = {};
 }
 
 bool Processor::hasJob() const {
@@ -70,4 +73,10 @@ void Processor::setProcessorNumber(int num) {
 
 bool Processor::isRunning() const {
     return runningStatus;
+}
+Job Processor::peekCurrentJob() {
+    Job peekCurJob;
+    peekCurJob = currentJob;
+    return peekCurJob;
+
 }
