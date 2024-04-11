@@ -18,6 +18,9 @@ int main() {
 	vector<Job> data;
 	Job jobs;
 
+
+	ofstream logFile1("logFile.txt", ios::trunc); // Truncate the log file to reset it for every run
+
 	ifstream sortedFile("sorted.txt");  //opening our data so we can read from it
 	if (!sortedFile) {
 		cout << "Oopsie, couldn't open sorted file to read" << endl;
@@ -34,43 +37,14 @@ int main() {
 	int numBjobs = 0;
 	int numCjobs = 0;
 	int numDjobs = 0;
-	int overallNumJobs = 0;
+	int overallNumJobs = 1;
 	while (sortedFile >> type >> arrivalTime >> processingTime) {
 
 		jobs.type = type;
 		jobs.arrivalTime = arrivalTime;
 		jobs.processingTime = processingTime;
 
-		switch (jobs.type) {
-		case 'A':
-			overallNumJobs++;
-			numAjobs++;
-			jobs.jobTypeNumber = numAjobs;
-			jobs.overallJobNumber = overallNumJobs;
-			break;
-		case 'B':
-			overallNumJobs++;
-			numBjobs++;
-			jobs.jobTypeNumber = numBjobs;
-			jobs.overallJobNumber = overallNumJobs;
-			break;
-		case 'C':
-			overallNumJobs++;
-			numCjobs++;
-			jobs.jobTypeNumber = numCjobs;
-			jobs.overallJobNumber = overallNumJobs;
-			break;
-		case 'D':
-			overallNumJobs++;
-			numDjobs++;
-			jobs.jobTypeNumber = numDjobs;
-			jobs.overallJobNumber = overallNumJobs;
-			break;
-		default:
-			break;
-
-		}
-
+	
 		data.push_back(jobs);
 
 	}
@@ -94,34 +68,58 @@ int main() {
 	vector<int>queueSizeAtTime(TIMETORUN + 2);
 	queueSizeAtTime.at(0) = 0;
 	queueSizeAtTime.at(TIMETORUN + 1) = 0;
-	fstream logFile1("logFile.txt", ios::app);
 
 	bool multipleEvents = false;  //tick marks for logging purposes
 
 	cout << "# of processors: " << NUMOFPROCESSORS << endl;
 
-	for (time = 1; time <= 10; time++) {
+	for (time = 1; time <= TIMETORUN; time++) {
+
+		queue.incrementQueueWaitTimes();
 
 		multipleEvents = false;
-		/*while (!data.empty()) {
-			for (const auto& jobs : data) {
-				if (jobs.arrivalTime == time) {
-					if (jobs.type == 'A' || jobs.type == 'B' || jobs.type == 'C') {
-						queue.insertNormalQueue(jobs);
-					}
-					else if (jobs.type == 'D') {
-						queue.insertPriorityQueue(jobs);
-					}
-					queue.incrementQueueWaitTimes();
+		
+		logFile1 << "Time " << time << ": ";
+		if (multipleEvents) {
+			logFile1 << "-";
+		}
+		else {
+			logFile1 << " ";
+		}
 
-				}
+		logFile1 << "Queue: ";
+		if (queue.getTotalQueueSize() == 0) {
+			logFile1 << "Empty; ";
+		}
+		else {
+			logFile1 << queue.getTotalQueueSize() << " Job(s); ";
+
+		}
+
+		for (int i = 0; i < NUMOFPROCESSORS; i++) {
+			if (processors[i].hasJob()) {
+				logFile1 << "CPU " << processors.at(i).getProcessorNumber() << " Run Time:" << processors.at(i).getRunningTime() << "; ";
 			}
-		}*/
-		while (data.at(0).arrivalTime == time) {
-			jobs = data.at(0);
+			else {
+				logFile1 << "CPU " << processors.at(i).getProcessorNumber() << " Idle Time:" << processors.at(i).getIdleTime() << "; ";
+			}
+
+		}
+		logFile1 << endl;
+
+		logFile1 << "Time " << time << ": " << "Arrival: Overall Job: " << overallNumJobs << ", " << "Job " << jobs.type << ":" << jobs.jobTypeNumber << ", Processing Time: " << jobs.processingTime << ";" << endl;
+
+
+		while ((data.at(0).arrivalTime == time)) {
+			jobs.arrivalTime = data.at(0).arrivalTime;
+			jobs.processingTime = data.at(0).processingTime;
+			jobs.type = data.at(0).type;
 			data.erase(data.begin());
-			if (jobs.arrivalTime == 'D') {
+
+			if (jobs.type == 'D') {
+				numDjobs++;
 				queue.insertPriorityQueue(jobs);
+
 				logFile1 << "Time " << time << ": ";
 				if (multipleEvents) {
 					logFile1 << "-";
@@ -130,33 +128,254 @@ int main() {
 					logFile1 << " ";
 				}
 
-				logFile1 << "Arrival: Overall Job: " << jobs.overallJobNumber << ", " << "Job " << type << ":" << overallNumJobs << ", Processing Time: " << jobs.processingTime << ";";
-				logFile1 << "/n";
+				logFile1  << "Arrival: Overall Job: " << overallNumJobs << ", " << "Job " << jobs.type << ":" << numDjobs << ", Processing Time: " << jobs.processingTime << ";" << endl;
+
+				multipleEvents = true;
+				overallNumJobs++;
+			}
+			else if (jobs.type == 'C') {
+				numCjobs++;
+				queue.insertNormalQueue(jobs);
+
+				logFile1 << "Time " << time << ": ";
+				if (multipleEvents) {
+					logFile1 << "-";
+				}
+				else {
+					logFile1 << " ";
+				}
+
+				logFile1 <<  "Arrival: Overall Job: " << overallNumJobs << ", " << "Job " << jobs.type << ":" << numCjobs << ", Processing Time: " << jobs.processingTime << ";" << endl;
+
+				multipleEvents = true;
+				overallNumJobs++;
+			}
+			else if (jobs.type == 'B') {
+				numBjobs++;
+				queue.insertNormalQueue(jobs);
+
+				logFile1 << "Time " << time << ": ";
+				if (multipleEvents) {
+					logFile1 << "-";
+				}
+				else {
+					logFile1 << " ";
+				}
+
+				logFile1 << "Arrival: Overall Job: " << overallNumJobs << ", " << "Job " << jobs.type << ":" << numBjobs << ", Processing Time: " << jobs.processingTime << ";" << endl;
+
+				multipleEvents = true;
+				overallNumJobs++;
+			}
+			else if (jobs.type == 'A') {
+				numAjobs++;
+				queue.insertNormalQueue(jobs);
+
+				logFile1 << "Time " << time << ": ";
+				if (multipleEvents) {
+					logFile1 << "-";
+				}
+				else {
+					logFile1 << " ";
+				}
+
+				logFile1 << "Arrival: Overall Job: " << overallNumJobs << ", " << "Job " << jobs.type << ":" << numAjobs << ", Processing Time: " << jobs.processingTime << ";" << endl;
+
+				multipleEvents = true;
+				overallNumJobs++;
+			}
+		}
+	}
+
+
+	for (int i = 0; i < NUMOFPROCESSORS; i++) {
+		if (!processors.at(i).hasJob()) {
+			if (!queue.isPriorityQueueEmpty()) {
+				logFile1 << "Time " << time << ": ";
+				if (multipleEvents) {
+					logFile1 << "-";
+				}
+				else {
+					logFile1 << " ";
+				}
+				logFile1 << "- Begin Processing Job:";
+				if (processors.at(i).getIdleTime() == -1) {
+					totalTimeIdle = totalTimeIdle + processors.at(i).getIdleTime() + 1;
+				}
+				else {
+					totalTimeIdle = totalTimeIdle + processors.at(i).getIdleTime();
+				}
+				processors.at(i).insertJob(queue.removeJobPQ());
+				logFile1 << processors.at(i).peekCurrentJob().overallJobNumber << ", Job " << processors.at(i).peekCurrentJob().type << ":" << processors.at(i).peekCurrentJob().jobTypeNumber << " in CPU " << processors.at(i).getProcessorNumber() << endl;
 				multipleEvents = true;
 			}
 			else {
-				queue.insertNormalQueue(jobs);
-				logFile1 << "Time " << time << ": ";
-				if (multipleEvents) {
-					logFile1 << "-";
+				if (!queue.isNormalQueueEmpty()) {
+					logFile1 << "Time " << time << ": ";
+					if (multipleEvents) {
+						logFile1 << "-";
+					}
+					else {
+						logFile1 << " ";
+					}
+					logFile1 << "- Begin Processing Job:";
+					if (processors.at(i).getIdleTime() == -1) {
+						totalTimeIdle = totalTimeIdle + processors.at(i).getIdleTime() + 1;
+					}
+					else {
+						totalTimeIdle = totalTimeIdle + processors.at(i).getIdleTime();
+					}
+					processors.at(i).insertJob(queue.removeJobNorm());
+					logFile1 << processors.at(i).peekCurrentJob().overallJobNumber << ", Job " << processors.at(i).peekCurrentJob().type << ":" << processors.at(i).peekCurrentJob().jobTypeNumber << " in CPU " << processors.at(i).getProcessorNumber() << endl;
+					multipleEvents = true;
 				}
 				else {
-					logFile1 << " ";
+					if (processors.at(i).getIdleTime() == -1) {
+						totalTimeIdle = totalTimeIdle + processors.at(i).getIdleTime() + 1;
+					}
+					else {
+						totalTimeIdle = totalTimeIdle + processors.at(i).getIdleTime();
+					}
+					processors.at(i).incrementIdleTime();
 				}
-
-				logFile1 << "Arrival: Overall Job: " << jobs.overallJobNumber << ", " << "Job " << type << ":" << overallNumJobs << ", Processing Time: " << jobs.processingTime << ";";
-				logFile1 << "/n";
-				multipleEvents = true;
 			}
 
+		}
+		else {
+			if (!processors.at(i).isHighPriority()) {
+				if (!queue.isPriorityQueueEmpty()) {
 
-
-
-
-
-
+					queue.insertNormalQueue(processors.at(i).removeCurrentJob());
+					processors.at(i).insertJob(queue.removeJobPQ());
+					if (processors.at(i).getIdleTime() == -1) {
+						totalTimeIdle = totalTimeIdle + processors.at(i).getIdleTime() + 1;
+					}
+					else {
+						totalTimeIdle = totalTimeIdle + processors.at(i).getIdleTime();
+					}
+					logFile1 << "Time " << time << ": ";
+					if (multipleEvents) {
+						logFile1 << "-";
+					}
+					else {
+						logFile1 << " ";
+					}
+					logFile1 << "- Begin Processing Job:";
+					processors.at(i).insertJob(queue.removeJobPQ());
+					logFile1 << processors.at(i).peekCurrentJob().overallJobNumber << ", Job " << processors.at(i).peekCurrentJob().type << ":" << processors.at(i).peekCurrentJob().jobTypeNumber << " in CPU " << processors.at(i).getProcessorNumber() << endl;
+					multipleEvents = true;
+				}
+			}
 		}
 	}
+
+	for (int i = 0; i < NUMOFPROCESSORS; i++) {
+				if (processors.at(i).hasJob()) {
+					processors.at(i).reduceProcessingTime();
+					if (processors.at(i).getCurrentJob().processingTime == 0) {
+						logFile1 << "Time " << time << ": ";
+						if (multipleEvents) {
+							logFile1 << "-";
+						}
+						else {
+							logFile1 << " ";
+						}
+						logFile1 << "Complete Processing Job : " << processors.at(i).peekCurrentJob().overallJobNumber << ", Job " << processors.at(i).peekCurrentJob().type << " : " << processors.at(i).peekCurrentJob().jobTypeNumber << endl;
+						logFile1 << "\m";
+						queue.insertCompletedJob(processors.at(i).getCurrentJob());
+						processors.at(i).prepareForNewJob();
+
+						
+					}
+					if (!processors.at(i).hasJob()) {
+						if (!queue.isPriorityQueueEmpty()) {
+							logFile1 << "Time " << time << ": ";
+							if (multipleEvents) {
+								logFile1 << "-";
+							}
+							else {
+								logFile1 << " ";
+							}
+							logFile1 << "- Begin Processing Job:";
+							if (processors.at(i).getIdleTime() == -1) {
+								totalTimeIdle = totalTimeIdle + processors.at(i).getIdleTime() + 1;
+							}
+							else {
+								totalTimeIdle = totalTimeIdle + processors.at(i).getIdleTime();
+							}
+							processors.at(i).insertJob(queue.removeJobPQ());
+							logFile1 << processors.at(i).peekCurrentJob().overallJobNumber << ", Job " << processors.at(i).peekCurrentJob().type << ":" << processors.at(i).peekCurrentJob().jobTypeNumber << " in CPU " << processors.at(i).getProcessorNumber() << endl;
+							multipleEvents = true;
+						}
+						else {
+							if (!queue.isNormalQueueEmpty()) {
+								logFile1 << "Time " << time << ": ";
+								if (multipleEvents) {
+									logFile1 << "-";
+								}
+								else {
+									logFile1 << " ";
+								}
+								logFile1 << "- Begin Processing Job:";
+								if (processors.at(i).getIdleTime() == -1) {
+									totalTimeIdle = totalTimeIdle + processors.at(i).getIdleTime() + 1;
+								}
+								else {
+									totalTimeIdle = totalTimeIdle + processors.at(i).getIdleTime();
+								}
+								processors.at(i).insertJob(queue.removeJobNorm());
+								logFile1 << processors.at(i).peekCurrentJob().overallJobNumber << ", Job " << processors.at(i).peekCurrentJob().type << ":" << processors.at(i).peekCurrentJob().jobTypeNumber << " in CPU " << processors.at(i).getProcessorNumber() << endl;
+								multipleEvents = true;
+							}
+							else {
+								if (processors.at(i).getIdleTime() == -1) {
+									totalTimeIdle = totalTimeIdle + processors.at(i).getIdleTime() + 1;
+								}
+								else {
+									totalTimeIdle = totalTimeIdle + processors.at(i).getIdleTime();
+								}
+								processors.at(i).incrementIdleTime();
+							}
+						}
+
+					/*for (int i = 0; i < NUMOFPROCESSORS; i++) {
+						if (!processors.at(i).hasJob()) {
+							processors.at(i).incrementIdleTime();
+						}
+
+					}*/
+				}
+					else {
+						if (!processors.at(i).isHighPriority()) {
+							if (!queue.isPriorityQueueEmpty()) {
+
+								queue.insertNormalQueue(processors.at(i).removeCurrentJob());
+								processors.at(i).insertJob(queue.removeJobPQ());
+								if (processors.at(i).getIdleTime() == -1) {
+									totalTimeIdle = totalTimeIdle + processors.at(i).getIdleTime() + 1;
+								}
+								else {
+									totalTimeIdle = totalTimeIdle + processors.at(i).getIdleTime();
+								}
+								logFile1 << "Time " << time << ": ";
+								if (multipleEvents) {
+									logFile1 << "-";
+								}
+								else {
+									logFile1 << " ";
+								}
+								logFile1 << "- Begin Processing Job:";
+								processors.at(i).insertJob(queue.removeJobPQ());
+								logFile1 << processors.at(i).peekCurrentJob().overallJobNumber << ", Job " << processors.at(i).peekCurrentJob().type << ":" << processors.at(i).peekCurrentJob().jobTypeNumber << " in CPU " << processors.at(i).getProcessorNumber() << endl;
+								multipleEvents = true;
+							}
+						}
+					}
+			}
+		}
+
+
+	
 	logFile1.close();
 	return 0;
 }
