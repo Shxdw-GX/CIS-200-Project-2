@@ -1,30 +1,17 @@
-//
-//  queue.hpp
-//  200project2
-//
-//  Created by shreyas babel on 08/04/24.
-//
-
-#ifndef queue_hpp
-#define queue_hpp
-
-
-#include <queue>
-#include <vector>
-#include "job.hpp"
-
+#pragma once
+#include<vector>
+#include <iostream>
+#include "Job.h"
 using namespace std;
 
 class JobQueue {
 private:
-    queue<Job> normalQueue;
-    queue<Job> priorityQueue;
+    vector<Job> normalQueue;
+    vector<Job> priorityQueue;
     vector<Job> completedJobs;
-    vector<Job> data;
-
+    
 public:
     JobQueue();
-
     bool isNormalQueueEmpty() const;
     bool isPriorityQueueEmpty() const;
     void insertNormalQueue(const Job& job);
@@ -41,6 +28,10 @@ public:
     int getJobsArrivedCount(char jobType) const;
     int getJobsCompletedCount(char jobType) const;
     int getTotalQueueTime() const;
+    Job removeJobPQ();
+    Job removeJobNorm();
+    int getNumberAJobsCompleted();
+    int getNumberBJobsCompleted();
+    int getNumberCJobsCompleted();
+    int getNumberDJobsCompleted();
 };
-
-#endif /* queue_hpp */
