@@ -1,14 +1,6 @@
-//
-//  processor.hpp
-//  200project2
-//
-//  Created by shreyas babel on 08/04/24.
-//
-
-#ifndef processor_hpp
-#define processor_hpp
-
-#include "job.hpp"
+#pragma once
+#include "Job.h"
+#include "Queue.h"
 
 class Processor {
 private:
@@ -20,21 +12,24 @@ private:
     Job currentJob;
 
 public:
-    Processor(int num);
 
-    bool hasJob() const;
-    bool isHighPriority() const;
-    Job getCurrentJob() const;
-    void prepareForNewJob();
-    void insertJob(const Job& job);
-    int getProcessorNumber() const;
-    int getIdleTime() const;
-    int getRunningTime() const;
-    void reduceProcessingTime();
-    void incrementIdleTime();
-    void setProcessorNumber(int num);
-    bool isRunning() const;
-};
+    Processor();   //default constructor
+    Processor(int num);  //paramaterized constructor
 
-
-#endif /* processor_hpp */
+    bool hasJob() const;    //check if processor has a job
+    bool isHighPriority() const;  //checks if job is high priority
+    Job getCurrentJob() const;   //gets the current job provessor is working on
+    void prepareForNewJob();     //prepares processor for new job
+    void insertJob(const Job& job);   //insert a job
+    int getProcessorNumber() const;  //gets number of processors
+    int getIdleTime() const;    //gets the amount of idle time
+    int getRunningTime() const;   //gets the amount of running time
+    void reduceProcessingTime();   //decrements the processing time
+    void incrementIdleTime();   //increments the idle time
+    void setProcessorNumber(int num);  //setting the processor number
+    bool isRunning() const;   //checks if processor is running
+    Job peekCurrentJob();    //peeks the current job
+    Job removeCurrentJob();   //removes the current job
+    void incrementRunTime();   //increments runtime
+    void makeBusy();     //makes the processor busy
+}; 
