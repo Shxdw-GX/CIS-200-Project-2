@@ -1,12 +1,4 @@
-//
-//  job.hpp
-//  200project2
-//
-//  Created by shreyas babel on 08/04/24.
-//
-
-#ifndef JOB_H
-#define JOB_H
+#pragma once
 
 struct Job {
     char type;
@@ -16,9 +8,3 @@ struct Job {
     int processingTime;
     int timeInQueue;
 };
-
-#endif
-
-
-
-
