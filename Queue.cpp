@@ -1,10 +1,59 @@
 #include "Queue.h"
-//#include "Job.h"
 
 JobQueue::JobQueue() {
 
 }
+Job JobQueue::removeJobPQ() {
+    Job temp;
+    if (!priorityQueue.empty()) {
+        temp = priorityQueue.at(0);
+        priorityQueue.erase(priorityQueue.begin());
+    }
+    return temp;
 
+}
+Job JobQueue::removeJobNorm() {
+    Job temp;
+    temp = normalQueue.at(0);
+    normalQueue.erase(normalQueue.begin());
+    return temp;
+}
+int JobQueue::getNumberAJobsCompleted()
+{
+    int completedA = 0;
+    for (int i = 0; i < completedJobs.size(); i++) {
+        if (completedJobs.at(i).type == 'A')
+            completedA++;
+    }
+    return completedA;
+}
+int JobQueue::getNumberBJobsCompleted()
+{
+    int completedB = 0;
+    for (int i = 0; i < completedJobs.size(); i++) {
+        if (completedJobs.at(i).type == 'B')
+            completedB++;
+    }
+    return completedB;
+}
+int JobQueue::getNumberCJobsCompleted()
+{
+    int completedC = 0;
+    for (int i = 0; i < completedJobs.size(); i++) {
+        if (completedJobs.at(i).type == 'C')
+            completedC++;
+    }
+    return completedC;
+}
+int JobQueue::getNumberDJobsCompleted()
+{
+    int completedD = 0;
+    for (int i = 0; i < completedJobs.size(); i++) {
+        if (completedJobs.at(i).type == 'D')
+            completedD++;
+    }
+    return completedD;
+}
 bool JobQueue::isNormalQueueEmpty() const {
     return normalQueue.empty();
 }
@@ -28,21 +77,7 @@ void JobQueue::insertCompletedJob(const Job& job) {
 void JobQueue::insertFrontNormalQueue(const Job& job) {
 
     normalQueue.insert(normalQueue.begin(), job);
-    normalQueue.erase(normalQueue.begin());
-    //vector<Job> tempQueue;
-    //tempQueue.push_back(job);
 
-    //// Move all existing jobs to temporary queue
-    // while (!normalQueue.empty()) {
-    //   tempQueue.push_back(normalQueue.front());
-    //    normalQueue.pop_back();
-    //}
-
-    //// Move new job to front of normal queue
-    //while (!tempQueue.empty()) {
-    //    normalQueue.push_back(tempQueue.front());
-    //    tempQueue.pop_back();
-    //}
 }
 
 Job JobQueue::getFrontNormalQueue() {
@@ -60,7 +95,7 @@ Job JobQueue::getFrontNormalQueue() {
 Job JobQueue::getFrontPriorityQueue() {
     if (!priorityQueue.empty()) {
         Job frontJob = priorityQueue.front();
-        priorityQueue.front();  //ask why he is popping???
+        priorityQueue.front();
         return frontJob;
     }
     else {
@@ -86,7 +121,6 @@ int JobQueue::getCompletedJobsCount() const {
 }
 
 void JobQueue::incrementQueueWaitTimes() {
-
     for (auto& job : normalQueue) {  //incrementing the time in queue of normal queue
         job.timeInQueue++;
     }
@@ -94,43 +128,25 @@ void JobQueue::incrementQueueWaitTimes() {
     for (auto& job : priorityQueue) {  //incrementig the time in the queue of priority queue
         job.timeInQueue++;
     }
-
-    /*vector<Job> tempQueue = normalQueue;
-
-    while (!tempQueue.empty()) {
-        Job& job = tempQueue.front();
-        job.timeInQueue++;
-        tempQueue.pop_back();
-    }
-
-    tempQueue = priorityQueue;
-
-    while (!tempQueue.empty()) {
-        Job& job = tempQueue.front();
-        job.timeInQueue++;
-        tempQueue.pop_back();
-    }*/
 }
 
-int JobQueue::getJobsArrivedCount(char jobType) const {   //idk about this check it
+
+
+int JobQueue::getJobsArrivedCount(char jobType) const {
     int count = 0;
 
-    vector<Job> tempQueue = normalQueue;
-
-    while (!tempQueue.empty()) {
-        if (tempQueue.front().type == jobType) {
+    // Iterate over normalQueue
+    for (const auto& job : normalQueue) {
+        if (job.type == jobType) {
             count++;
         }
-        tempQueue.pop_back();
     }
 
-    tempQueue = priorityQueue;
-
-    while (!tempQueue.empty()) {
-        if (tempQueue.front().type == jobType) {
+    // Iterate over priorityQueue
+    for (const auto& job : priorityQueue) {
+        if (job.type == jobType) {
             count++;
         }
-        tempQueue.pop_back();
     }
 
     return count;
@@ -140,41 +156,29 @@ int JobQueue::getJobsCompletedCount(char jobType) const {
     int count = 0;
 
     for (const auto& job : completedJobs) {
-        /*if (job.type == jobType) {
-            count++;
-        }*/
+        
         count++;
     }
 
     return count;
 }
 
-int JobQueue::getTotalQueueTime() const {    //idk about this check it
+
+int JobQueue::getTotalQueueTime() const {
     int totalTime = 0;
 
-    vector<Job> tempQueue = normalQueue;
-
-    while (!tempQueue.empty()) {
-        totalTime += tempQueue.front().timeInQueue;
-        tempQueue.pop_back();
+    // Iterate over normalQueue
+    for (const auto& job : normalQueue) {
+        totalTime += job.timeInQueue;
     }
 
-    tempQueue = priorityQueue;
-
-    while (!tempQueue.empty()) {
-        totalTime += tempQueue.front().timeInQueue;
-        tempQueue.pop_back();
+    // Iterate over priorityQueue
+    for (const auto& job : priorityQueue) {
+        totalTime += job.timeInQueue;
     }
 
     return totalTime;
 }
-
-//void JobQueue::insertDataQueue(const Job& job)
-//{
-//    data.push_back(job);
-//}
-
-
 
 
 
