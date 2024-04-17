@@ -35,11 +35,13 @@ Job Processor::getCurrentJob() const {
 void Processor::prepareForNewJob() {
     isBusy = false;
     currentJob = {}; // Reset current job
+    runningTime = 0;
 }
 
 void Processor::insertJob(const Job& job) {
     currentJob = job;
     isBusy = true;
+    idleTime = 0;   
 }
 
 int Processor::getProcessorNumber() const {
@@ -57,7 +59,6 @@ int Processor::getRunningTime() const {
 void Processor::reduceProcessingTime() {
     if (isBusy) {
         currentJob.processingTime--;
-        runningTime++;
     }
 }
 
@@ -80,3 +81,29 @@ Job Processor::peekCurrentJob() {
     return peekCurJob;
 
 }
+
+Job Processor::removeCurrentJob() {
+    Job Temp;
+    Temp = currentJob;
+    isBusy = false;
+    runningTime = 0;
+    currentJob.arrivalTime = 0;
+    currentJob.jobTypeNumber = 0;
+    currentJob.type = 'E';
+    currentJob.processingTime = 0;
+    currentJob.timeInQueue = 0;
+    currentJob.overallJobNumber = 0;
+    return Temp;
+}
+
+void Processor::incrementRunTime()
+{
+    runningTime++;
+}
+
+void Processor::makeBusy()
+{
+    isBusy = true;
+}
+
+
